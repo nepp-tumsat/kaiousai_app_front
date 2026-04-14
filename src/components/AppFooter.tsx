@@ -17,7 +17,7 @@ export default function AppFooter() {
         </Link>
       </nav>
       <p className="app-footer-copyright">
-        © 2026 東京海洋大学 海王祭実行委員会 / 東京海洋大学プログラミングサークルNePP
+        © 2026 海王祭実行委員会 / 東京海洋大学プログラミングサークルNePP
       </p>
     </footer>
   )
