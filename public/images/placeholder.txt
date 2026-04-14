@@ -1,0 +1,5 @@
+public/images/ の配置ルール
+
+- map/ … キャンパスマップなどアプリ共通の地図画像（例: campus-map.png）
+- shops/ … 模擬店・企画の写真。`scripts/sources/shops.json` の `image` は
+  `public/images/` からの相対パスで、`shops/` で始める（例: shops/yakisoba.jpg）

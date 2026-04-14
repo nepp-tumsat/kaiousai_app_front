@@ -1,0 +1,111 @@
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* iPhone のホームインジケータ分だけ余白を追加 */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.map-container .leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg);
+}
+
+.map-mode-toggle {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: inline-flex;
+  background-color: var(--bg);
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.map-mode-button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.map-mode-button.active {
+  background-color: var(--primary);
+  color: var(--bg);
+}
+
+.current-location-button {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0));
+  right: 20px;
+  z-index: 1000;
+  background-color: var(--primary);
+  color: var(--bg);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.current-location-button:hover {
+  background-color: var(--accent);
+}
+
+.zoom-indicator {
+  position: absolute;
+  left: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0));
+  z-index: 1000;
+  padding: 4px 8px;
+  background-color: var(--bg);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.category-marker-icon,
+.nepp-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-marker-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.nepp-marker-pulse {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  box-shadow: 0 0 0 rgba(72, 166, 167, 0.65);
+  animation: nepp-pulse 1.5s infinite;
+}
+
+@keyframes nepp-pulse {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(72, 166, 167, 0.65);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(72, 166, 167, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(72, 166, 167, 0);
+  }
+}
