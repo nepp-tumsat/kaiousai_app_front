@@ -9,6 +9,7 @@ export const metadata = {
   title: '海王祭Webアプリ',
   description: '東京海洋大学 海王祭のインタラクティブマップとタイムテーブル',
   manifest: '/manifest.json',
+  icons: { icon: '/favicon.ico' },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
