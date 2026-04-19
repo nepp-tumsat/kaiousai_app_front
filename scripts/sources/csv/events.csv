@@ -1,0 +1,2 @@
+public,id,location_id,title,organization,department,description,day,when_sunny,when_rainy,start_time,end_time,img_name
+TRUE,EV-001,LC-035,開会式,海王祭実行委員会,,test,2025-05-16,TRUE,TRUE,9:00,9:30,

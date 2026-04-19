@@ -15,8 +15,8 @@ const ShopPopup: FC<ShopPopupProps> = ({ shop, onClose }) => {
   const imageSrc = assetUrl(`/images/${shop.image}`)
   const fallbackSrc = assetUrl('/images/placeholder-shop.png')
   const [currentSrc, setCurrentSrc] = useState(imageSrc)
-  const organizationName = shop.organizationName ?? '未設定'
-  const projectName = shop.projectName ?? shop.name
+  const organizationLabel = shop.organization.trim() !== '' ? shop.organization : '未設定'
+  const venueLine = [shop.area, shop.location].filter((s) => s.trim() !== '').join(' ・ ')
 
   useEffect(() => {
     setCurrentSrc(imageSrc)
@@ -30,7 +30,7 @@ const ShopPopup: FC<ShopPopupProps> = ({ shop, onClose }) => {
         </button>
         <Image
           src={currentSrc}
-          alt={shop.name}
+          alt={shop.title}
           width={1200}
           height={800}
           className="shop-popup-image"
@@ -39,8 +39,9 @@ const ShopPopup: FC<ShopPopupProps> = ({ shop, onClose }) => {
           }}
         />
         <div className="shop-popup-info">
-          <h2>{projectName}</h2>
-          <p className="shop-popup-organization">{organizationName}</p>
+          <h2>{shop.title}</h2>
+          {venueLine && <p className="shop-popup-venue">{venueLine}</p>}
+          <p className="shop-popup-organization">{organizationLabel}</p>
           <p className="shop-popup-description">{shop.description}</p>
         </div>
       </div>

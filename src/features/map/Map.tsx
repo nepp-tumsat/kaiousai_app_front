@@ -1,10 +1,20 @@
 'use client'
 
 import './Map.css'
-import { useEffect, useRef, useState } from 'react'
-import { CircleMarker, ImageOverlay, MapContainer, Marker, Popup, TileLayer, useMapEvents } from 'react-leaflet'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { MutableRefObject } from 'react'
+import {
+  CircleMarker,
+  ImageOverlay,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from 'react-leaflet'
 import L from 'leaflet'
-import { getShops, type Shop, type ShopCategory } from '../../data/loaders'
+import { getMapAreas, getShops, type Shop, type ShopCategory } from '../../data/loaders'
 import { assetUrl } from '../../lib/assetUrl'
 import ShopPopup from './ShopPopup'
 
@@ -65,8 +75,108 @@ function CampusSvgOverlay() {
   )
 }
 
-function ZoomIndicator() {
-  const [zoom, setZoom] = useState<number>(16)
+/** 開発時のみ: 地図を右クリックした位置の lat / lng を表示（本番ビルドでは無効） */
+function DevMapRightClickCoords() {
+  const [hint, setHint] = useState<{
+    latText: string
+    lngText: string
+    csvLine: string
+  } | null>(null)
+  const dismissTimerRef = useRef<number | undefined>(undefined)
+
+  useMapEvents({
+    contextmenu(e) {
+      if (process.env.NODE_ENV !== 'development') return
+      e.originalEvent.preventDefault()
+      const { lat, lng } = e.latlng
+      const latText = lat.toFixed(7)
+      const lngText = lng.toFixed(7)
+      const csvLine = `${latText},${lngText}`
+      if (dismissTimerRef.current !== undefined) {
+        window.clearTimeout(dismissTimerRef.current)
+      }
+      setHint({ latText, lngText, csvLine })
+      dismissTimerRef.current = window.setTimeout(() => {
+        setHint(null)
+        dismissTimerRef.current = undefined
+      }, 15000)
+    },
+  })
+
+  useEffect(() => {
+    return () => {
+      if (dismissTimerRef.current !== undefined) {
+        window.clearTimeout(dismissTimerRef.current)
+      }
+    }
+  }, [])
+
+  if (process.env.NODE_ENV !== 'development') return null
+  if (!hint) return null
+
+  return (
+    <div className="map-dev-coords-hint" role="status">
+      <div className="map-dev-coords-hint__title">右クリック座標（DEV）</div>
+      <div className="map-dev-coords-hint__row">
+        <span className="map-dev-coords-hint__label">lat</span>
+        <code>{hint.latText}</code>
+      </div>
+      <div className="map-dev-coords-hint__row">
+        <span className="map-dev-coords-hint__label">lng</span>
+        <code>{hint.lngText}</code>
+      </div>
+      <div className="map-dev-coords-hint__actions">
+        <button
+          type="button"
+          className="map-dev-coords-hint__copy"
+          onClick={() => {
+            void navigator.clipboard?.writeText(hint.csvLine)
+          }}
+        >
+          コピー
+        </button>
+        <button
+          type="button"
+          className="map-dev-coords-hint__close"
+          onClick={() => {
+            if (dismissTimerRef.current !== undefined) {
+              window.clearTimeout(dismissTimerRef.current)
+              dismissTimerRef.current = undefined
+            }
+            setHint(null)
+          }}
+          aria-label="閉じる"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  )
+}
+
+type MarkerRefMap = Record<string, L.Marker | null>
+
+function MapZoomAndMarkers({
+  shops,
+  isMapReady,
+  markerRefs,
+  setSelectedShop,
+  getCategoryColor,
+}: {
+  shops: Shop[]
+  isMapReady: boolean
+  markerRefs: MutableRefObject<MarkerRefMap>
+  setSelectedShop: (shop: Shop) => void
+  getCategoryColor: (category: ShopCategory) => string
+}) {
+  const map = useMap()
+  const [zoom, setZoom] = useState(() => map.getZoom())
+  const [mapPayload] = useState(() => getMapAreas())
+  /** areas があるとき: zoom < shopPinsMinZoom でエリア、zoom >= で店舗（location）。既定 20 → 19 までエリア */
+  const showShopPins = mapPayload.areas.length === 0 || zoom >= mapPayload.shopPinsMinZoom
+  /** ズーム 17 以下ではエリア代表ピンは「正門」のみ（遠景のノイズ低減） */
+  const areaPinsForZoom =
+    zoom <= 17 ? mapPayload.areas.filter((a) => a.name === '正門') : mapPayload.areas
 
   useMapEvents({
     zoomend(e) {
@@ -77,7 +187,134 @@ function ZoomIndicator() {
     },
   })
 
-  return <div className="zoom-indicator">{zoom}</div>
+  /** 初期表示・エリア／店舗の切替後に、すべてのマーカーで Popup を開く */
+  useEffect(() => {
+    if (!isMapReady) return
+    let timeoutId: number | undefined
+    const openAllPopups = () => {
+      timeoutId = window.setTimeout(() => {
+        Object.values(markerRefs.current).forEach((marker) => {
+          marker?.openPopup()
+        })
+      }, 120)
+    }
+    map.whenReady(openAllPopups)
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId)
+    }
+  }, [
+    isMapReady,
+    map,
+    showShopPins,
+    areaPinsForZoom.length,
+    mapPayload.eventLocationPins.length,
+    markerRefs,
+  ])
+
+  return (
+    <>
+      <div className="zoom-indicator">{zoom}</div>
+      {showShopPins ? (
+        <>
+          {shops.map((shop) => (
+            <Marker
+              key={`shop-${shop.id}`}
+              position={shop.coordinates}
+              ref={(marker) => {
+                const key = `shop-${shop.id}`
+                if (marker) markerRefs.current[key] = marker
+                else delete markerRefs.current[key]
+              }}
+              eventHandlers={{
+                click: () => setSelectedShop(shop),
+              }}
+              icon={L.divIcon({
+                className: 'category-marker-icon',
+                html: `<div class="category-marker-dot" style="background-color:${getCategoryColor(shop.category)}"></div>`,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+              })}
+            >
+              <Popup
+                className={`map-popup--shop map-popup--shop-${shop.category}`}
+                autoPan={false}
+                autoClose={false}
+                closeOnClick={false}
+                offset={[0, -10]}
+              >
+                <div
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedShop(shop)
+                  }}
+                >
+                  {shop.title}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+          {mapPayload.eventLocationPins.map((pin) => (
+            <Marker
+              key={`evloc-${pin.id}`}
+              position={pin.coordinates}
+              ref={(marker) => {
+                const key = `evloc-${pin.id}`
+                if (marker) markerRefs.current[key] = marker
+                else delete markerRefs.current[key]
+              }}
+              icon={L.divIcon({
+                className: 'event-location-marker-icon',
+                html: '<div class="event-location-marker-diamond"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+              })}
+            >
+              <Popup
+                className="map-popup--event-location"
+                autoPan={false}
+                autoClose={false}
+                closeOnClick={false}
+                offset={[0, -10]}
+              >
+                <div className="event-location-marker-popup">{pin.label}</div>
+              </Popup>
+            </Marker>
+          ))}
+        </>
+      ) : (
+        <>
+          {areaPinsForZoom.map((area) => (
+            <Marker
+              key={`area-${area.id}`}
+              position={area.coordinates}
+              ref={(marker) => {
+                const key = `area-${area.id}`
+                if (marker) markerRefs.current[key] = marker
+                else delete markerRefs.current[key]
+              }}
+              icon={L.divIcon({
+                className: 'area-marker-icon',
+                html: '<div class="area-marker-disc"></div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+              })}
+            >
+              <Popup
+                autoPan={false}
+                autoClose={false}
+                closeButton={false}
+                closeOnClick={false}
+                offset={[0, -10]}
+              >
+                <div className="area-marker-popup">{area.name}</div>
+              </Popup>
+            </Marker>
+          ))}
+        </>
+      )}
+    </>
+  )
 }
 
 export default function MapFeature() {
@@ -86,24 +323,20 @@ export default function MapFeature() {
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [viewMode, setViewMode] = useState<'outdoor' | 'indoor'>('outdoor')
-  const markerRefs = useRef<Record<number, L.Marker | null>>({})
+  const markerRefs = useRef<MarkerRefMap>({})
+
+  /** 店舗詳細を開いても Leaflet の既定クリックで吹き出しが閉じないよう、直後に再オープンする */
+  const openShopDetail = useCallback((shop: Shop) => {
+    setSelectedShop(shop)
+    const key = `shop-${shop.id}`
+    queueMicrotask(() => {
+      markerRefs.current[key]?.openPopup()
+    })
+  }, [])
 
   useEffect(() => {
     setIsMapReady(true)
   }, [])
-
-  useEffect(() => {
-    if (!isMapReady) return
-    const refs = markerRefs.current
-    const timer = setTimeout(() => {
-      Object.values(refs).forEach((marker) => {
-        if (marker) {
-          marker.openPopup()
-        }
-      })
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [isMapReady])
 
   const getCategoryColor = (category: ShopCategory) => {
     switch (category) {
@@ -142,63 +375,32 @@ export default function MapFeature() {
       {isMapReady && (
         <MapContainer
           center={[35.667957411840746, 139.79262060541004]}
-          zoom={16}
-          maxZoom={19}
+          zoom={18}
+          maxZoom={21}
           style={{ height: '100%', width: '100%' }}
           closePopupOnClick={false}
         >
-          <ZoomIndicator />
+          <MapZoomAndMarkers
+            shops={filteredShops}
+            isMapReady={isMapReady}
+            markerRefs={markerRefs}
+            setSelectedShop={openShopDetail}
+            getCategoryColor={getCategoryColor}
+          />
+          <DevMapRightClickCoords />
           {viewMode === 'outdoor' && (
             <>
               <TileLayer
                 attribution="&copy; OpenStreetMap"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 maxNativeZoom={19}
-                maxZoom={19}
+                maxZoom={21}
                 opacity={0.4}
               />
               <CampusSvgOverlay />
             </>
           )}
           {viewMode === 'indoor' && <CampusSvgOverlay />}
-          {filteredShops.map((shop) => (
-            <Marker
-              key={shop.id}
-              position={shop.location}
-              ref={(marker) => {
-                if (marker) {
-                  markerRefs.current[shop.id] = marker
-                }
-              }}
-              eventHandlers={{
-                click: () => setSelectedShop(shop),
-              }}
-              icon={
-                shop.isNepp
-                  ? L.divIcon({
-                      className: 'nepp-marker-icon',
-                      html: '<div class="nepp-marker-pulse"></div>',
-                      iconSize: [24, 24],
-                      iconAnchor: [12, 12],
-                    })
-                  : L.divIcon({
-                      className: 'category-marker-icon',
-                      html: `<div class="category-marker-dot" style="background-color:${getCategoryColor(shop.category)}"></div>`,
-                      iconSize: [20, 20],
-                      iconAnchor: [10, 10],
-                    })
-              }
-            >
-              <Popup autoClose={false} closeOnClick={false}>
-                <div
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setSelectedShop(shop)}
-                >
-                  {shop.name}
-                </div>
-              </Popup>
-            </Marker>
-          ))}
           {viewMode === 'outdoor' && userLocation && (
             <>
               <CircleMarker
@@ -211,7 +413,7 @@ export default function MapFeature() {
                   fillOpacity: 0,
                 }}
               >
-                <Popup autoClose={false} closeOnClick={false}>
+                <Popup autoPan={false} autoClose={false} closeOnClick={false} offset={[0, -10]}>
                   あなたの現在地
                 </Popup>
               </CircleMarker>
@@ -235,9 +437,17 @@ export default function MapFeature() {
         </MapContainer>
       )}
       {selectedShop && (
-        <ShopPopup shop={selectedShop} onClose={() => setSelectedShop(null)} />
+        <ShopPopup
+          shop={selectedShop}
+          onClose={() => {
+            const id = selectedShop.id
+            setSelectedShop(null)
+            queueMicrotask(() => {
+              markerRefs.current[`shop-${id}`]?.openPopup()
+            })
+          }}
+        />
       )}
     </div>
   )
 }
-
