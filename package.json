@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "ingest": "tsx scripts/ingest.ts",
-    "generate-csv-sources": "node scripts/generate-csv-sources.mjs",
     "prebuild": "npm run ingest",
     "predev": "npm run ingest",
     "dev": "next dev",

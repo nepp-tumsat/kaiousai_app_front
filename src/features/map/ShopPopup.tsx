@@ -13,7 +13,7 @@ interface ShopPopupProps {
 
 const ShopPopup: FC<ShopPopupProps> = ({ shop, onClose }) => {
   const imageSrc = assetUrl(`/images/${shop.image}`)
-  const fallbackSrc = assetUrl('/images/placeholder-shop.png')
+  const fallbackSrc = assetUrl('/images/shops/placeholder.png')
   const [currentSrc, setCurrentSrc] = useState(imageSrc)
   const organizationLabel = shop.organization.trim() !== '' ? shop.organization : '未設定'
   const venueLine = [shop.area, shop.location].filter((s) => s.trim() !== '').join(' ・ ')
