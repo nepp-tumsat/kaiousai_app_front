@@ -71,41 +71,192 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+/* 開発時のみ表示: 右クリックした座標 */
+.map-dev-coords-hint {
+  position: absolute;
+  left: 8px;
+  bottom: calc(48px + env(safe-area-inset-bottom, 0));
+  z-index: 1001;
+  min-width: 200px;
+  max-width: min(92vw, 280px);
+  padding: 8px 10px;
+  background-color: var(--bg);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.map-dev-coords-hint__title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.map-dev-coords-hint__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.map-dev-coords-hint__row code {
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.map-dev-coords-hint__label {
+  flex: 0 0 2rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.map-dev-coords-hint__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.map-dev-coords-hint__copy {
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  background-color: var(--primary);
+  color: var(--bg);
+}
+
+.map-dev-coords-hint__copy:hover {
+  background-color: var(--accent);
+}
+
+.map-dev-coords-hint__close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.map-dev-coords-hint__close:hover {
+  color: var(--text);
+}
+
 .category-marker-icon,
-.nepp-marker-icon {
+.area-marker-icon {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.category-marker-dot {
-  width: 16px;
-  height: 16px;
+.area-marker-disc {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 2px solid var(--bg);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  background-color: var(--primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.nepp-marker-pulse {
+.area-marker-popup {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.category-marker-dot {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background-color: var(--primary);
-  box-shadow: 0 0 0 rgba(72, 166, 167, 0.65);
-  animation: nepp-pulse 1.5s infinite;
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-@keyframes nepp-pulse {
-  0% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(72, 166, 167, 0.65);
-  }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(72, 166, 167, 0);
-  }
-  100% {
-    transform: scale(0.9);
-    box-shadow: 0 0 0 0 rgba(72, 166, 167, 0);
-  }
+.event-location-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-location-marker-diamond {
+  width: 14px;
+  height: 14px;
+  transform: rotate(45deg);
+  border: 2px solid var(--bg);
+  background-color: #546e7a;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.event-location-marker-popup {
+  font-weight: 600;
+  color: #546e7a;
+}
+
+/** 地図上の Leaflet 吹き出し：本文を中央揃え */
+.map-container .leaflet-popup .leaflet-popup-content {
+  text-align: center;
+}
+
+.map-container .leaflet-popup.map-popup--event-location .leaflet-popup-content-wrapper {
+  background: color-mix(in srgb, #546e7a 22%, var(--bg));
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, #546e7a 38%, transparent);
+}
+
+.map-container .leaflet-popup.map-popup--event-location .leaflet-popup-tip {
+  background: color-mix(in srgb, #546e7a 22%, var(--bg));
+  box-shadow: none;
+}
+
+/** 店舗（location）吹き出し：カテゴリ色（マーカーと同系） */
+.map-container .leaflet-popup.map-popup--shop .leaflet-popup-content-wrapper {
+  color: var(--text);
+}
+
+.map-container .leaflet-popup.map-popup--shop .leaflet-popup-tip {
+  box-shadow: none;
+}
+
+.map-container .leaflet-popup.map-popup--shop-food .leaflet-popup-content-wrapper {
+  background: color-mix(in srgb, #ff7043 26%, var(--bg));
+  border: 1px solid color-mix(in srgb, #ff7043 42%, transparent);
+}
+
+.map-container .leaflet-popup.map-popup--shop-food .leaflet-popup-tip {
+  background: color-mix(in srgb, #ff7043 26%, var(--bg));
+}
+
+.map-container .leaflet-popup.map-popup--shop-stage .leaflet-popup-content-wrapper {
+  background: color-mix(in srgb, #ab47bc 26%, var(--bg));
+  border: 1px solid color-mix(in srgb, #ab47bc 42%, transparent);
+}
+
+.map-container .leaflet-popup.map-popup--shop-stage .leaflet-popup-tip {
+  background: color-mix(in srgb, #ab47bc 26%, var(--bg));
+}
+
+.map-container .leaflet-popup.map-popup--shop-facility .leaflet-popup-content-wrapper {
+  background: color-mix(in srgb, #42a5f5 26%, var(--bg));
+  border: 1px solid color-mix(in srgb, #42a5f5 42%, transparent);
+}
+
+.map-container .leaflet-popup.map-popup--shop-facility .leaflet-popup-tip {
+  background: color-mix(in srgb, #42a5f5 26%, var(--bg));
+}
+
+.map-container .leaflet-popup.map-popup--shop-experience .leaflet-popup-content-wrapper {
+  background: color-mix(in srgb, #66bb6a 26%, var(--bg));
+  border: 1px solid color-mix(in srgb, #66bb6a 42%, transparent);
+}
+
+.map-container .leaflet-popup.map-popup--shop-experience .leaflet-popup-tip {
+  background: color-mix(in srgb, #66bb6a 26%, var(--bg));
 }

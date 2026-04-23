@@ -1,44 +1,100 @@
 [
   {
-    "id": 1,
-    "organizationName": "海王祭実行委員会 屋台班",
-    "projectName": "海王焼きそば",
-    "name": "海王焼きそば",
-    "description": "伝統の味！海鮮たっぷり塩焼きそば。",
-    "location": [
-      35.66751236917332,
-      139.79109988158692
+    "organization": "海王祭実行委員会",
+    "title": "本部",
+    "description": "本部",
+    "area": "",
+    "location": "本部",
+    "coordinates": [
+      35.66742024,
+      139.7911257
     ],
-    "image": "shops/yakisoba.jpg",
-    "category": "food",
-    "isNepp": false
+    "image": "shops/placeholder.png",
+    "category": "facility",
+    "id": 1
   },
   {
-    "id": 2,
-    "organizationName": "NePP",
-    "projectName": "プログラミング体験",
-    "name": "NePP プログラミング体験",
-    "description": "君もエンジニアになろう！部員募集中。",
-    "location": [
-      35.667000819208205,
-      139.79263818382944
+    "organization": "海王祭実行委員会",
+    "title": "海王祭実行委員会ブース",
+    "description": "test1",
+    "area": "",
+    "location": "海王祭実行委員会ブース",
+    "coordinates": [
+      35.66738266,
+      139.7910868
     ],
-    "image": "shops/nepp_booth.jpg",
+    "image": "shops/placeholder.png",
+    "category": "facility",
+    "id": 2
+  },
+  {
+    "organization": "海王祭実行委員会",
+    "title": "ベビーカー置き場",
+    "description": "test2",
+    "area": "",
+    "location": "ベビーカー置き場",
+    "coordinates": [
+      35.66733145,
+      139.7910231
+    ],
+    "image": "shops/placeholder.png",
+    "category": "facility",
+    "id": 3
+  },
+  {
+    "organization": "日本海洋塾",
+    "title": "日本海洋塾",
+    "description": "test3",
+    "area": "",
+    "location": "日本海洋塾",
+    "coordinates": [
+      35.66777495,
+      139.7907017
+    ],
+    "image": "shops/placeholder.png",
     "category": "experience",
-    "isNepp": true
+    "id": 4
   },
   {
-    "id": 3,
-    "organizationName": "海王祭実行委員会 ステージ班",
-    "projectName": "ステージ企画",
-    "name": "ステージ企画",
-    "description": "ライブパフォーマンスとダンスショー！",
-    "location": [
-      35.6674014773522,
-      139.79056767696503
+    "organization": "日本海事代理士会",
+    "title": "日本海事代理士会",
+    "description": "test4",
+    "area": "",
+    "location": "日本海事代理士会",
+    "coordinates": [
+      35.66775017,
+      139.7906598
     ],
-    "image": "shops/stage.jpg",
-    "category": "stage",
-    "isNepp": false
+    "image": "shops/placeholder.png",
+    "category": "experience",
+    "id": 5
+  },
+  {
+    "organization": "ナカシマプロペラ株式会社",
+    "title": "ナカシマプロペラ株式会社",
+    "description": "test5",
+    "area": "",
+    "location": "ナカシマプロペラ株式会社",
+    "coordinates": [
+      35.66771901,
+      139.7906058
+    ],
+    "image": "shops/placeholder.png",
+    "category": "experience",
+    "id": 6
+  },
+  {
+    "organization": "今治造船株式会社",
+    "title": "今治造船株式会社",
+    "description": "test6",
+    "area": "",
+    "location": "今治造船株式会社",
+    "coordinates": [
+      35.66767935,
+      139.7905465
+    ],
+    "image": "shops/placeholder.png",
+    "category": "experience",
+    "id": 7
   }
 ]
