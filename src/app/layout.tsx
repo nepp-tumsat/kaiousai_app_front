@@ -6,7 +6,6 @@ import '@/styles/globals.css'
 import '@/styles/App.css'
 import AppFooter from '@/components/AppFooter'
 import CookieBanner from '@/components/CookieBanner'
-import OnboardingModal from '@/features/onboarding/OnboardingModal'
 import GAPageView from '@/components/GAPageView'
 import Link from 'next/link'
 
@@ -49,8 +48,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Suspense>
           <GAPageView />
         </Suspense>
-        <OnboardingModal />
         <div className="app">
+          <div className="festival-ended-banner">
+            海王祭2026は終了しました。ご来場ありがとうございました。
+          </div>
           <Link href="/" className="app-header-link">
             <header className="app-header">
               <h1>海王祭</h1>
